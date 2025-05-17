@@ -1,50 +1,68 @@
-import { useState, useEffect } from "react";
+import { create } from "zustand";
 
-const defaultPlayerNames = ["Player 1", "Player 2", "Player 3", "Player 4"];
-const categories = ["L6oosh", "Diamonds", "Queens", "King"];
-const maxRounds = 4;
-const maxGames = 2;
+const LOCAL_STORAGE_KEY = "l6ooshGameData";
 
-const createInitialData = () => {
-  const data = {};
-  for (let r = 1; r <= maxRounds; r++) {
-    data[r] = {};
-    for (let g = 1; g <= maxGames; g++) {
-      data[r][g] = defaultPlayerNames.map(() =>
-        categories.reduce((acc, cat) => {
-          acc[cat] = { count: 0, doubled: false, playedBy: null };
-          return acc;
-        }, {})
-      );
-    }
+const loadFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
   }
-  return data;
 };
 
-export function useScoreStore() {
-  const [scores, setScores] = useState(() => {
-    const stored = localStorage.getItem("gameScores");
-    return stored ? JSON.parse(stored) : createInitialData();
-  });
+const saveToStorage = (data) => {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+  } catch {}
+};
 
-  const [names, setNames] = useState(() => {
-    const stored = localStorage.getItem("playerNames");
-    return stored ? JSON.parse(stored) : defaultPlayerNames;
-  });
+const defaultScores = () => {
+  const rounds = {};
+  for (let r = 1; r <= 4; r++) {
+    rounds[r] = {
+      1: Array(4).fill().map(() => ({
+        L6oosh: { count: 0 },
+        Diamonds: { count: 0 },
+        Queens: { count: 0, doubled: false, playedBy: null },
+        King: { count: 0, doubled: false, playedBy: null },
+      })),
+      2: Array(4).fill().map(() => ({
+        L6oosh: { count: 0 },
+        Diamonds: { count: 0 },
+        Queens: { count: 0, doubled: false, playedBy: null },
+        King: { count: 0, doubled: false, playedBy: null },
+      })),
+    };
+  }
+  return rounds;
+};
 
-  useEffect(() => {
-    localStorage.setItem("gameScores", JSON.stringify(scores));
-  }, [scores]);
+const defaultNames = ["Player 1", "Player 2", "Player 3", "Player 4"];
 
-  useEffect(() => {
-    localStorage.setItem("playerNames", JSON.stringify(names));
-  }, [names]);
+export const useScoreStore = create((set, get) => {
+  const saved = loadFromStorage();
+  const initialScores = saved?.scores || defaultScores();
+  const initialNames = saved?.names || defaultNames;
 
-  const resetAll = () => {
-    setScores(createInitialData());
-    setNames(defaultPlayerNames);
-    localStorage.clear();
+  return {
+    scores: initialScores,
+    names: initialNames,
+
+    setScores: (newScores) => {
+      set({ scores: newScores });
+      saveToStorage({ scores: newScores, names: get().names });
+    },
+
+    setNames: (newNames) => {
+      set({ names: newNames });
+      saveToStorage({ scores: get().scores, names: newNames });
+    },
+
+    resetScores: () => {
+      const reset = defaultScores();
+      set({ scores: reset, names: defaultNames });
+      saveToStorage({ scores: reset, names: defaultNames });
+    },
   };
-
-  return { scores, setScores, names, setNames, resetAll };
-}
+});

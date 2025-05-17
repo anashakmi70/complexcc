@@ -1,19 +1,18 @@
-// src/App.js
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 import RoundSelect from "./RoundSelect";
 import GameTracker from "./GameTracker";
 import "./App.css";
-
-const LOCAL_STORAGE_KEY = "l6ooshGameData";
+import { useScoreStore } from "./useScoreStore";
 
 function Home() {
   const navigate = useNavigate();
+  const resetScores = useScoreStore((state) => state.resetScores);
 
   const handleResetScores = () => {
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-    navigate("/");         // Optional: keep user on home page
-    window.location.reload(); // Force UI refresh
+    resetScores();
+    navigate("/");
+    window.location.reload();
   };
 
   return (

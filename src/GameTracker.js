@@ -46,38 +46,65 @@ function GameTracker() {
     const player = [...newScores[roundId][gameId]];
     const cat = player[playerIdx][catLabel];
     const max = maxValues[catLabel];
-
+  
+    // Total across all players
+    const totalForCategory = player.reduce((acc, p) => acc + p[catLabel].count, 0);
+  
+    if (totalForCategory >= max) {
+      closeModal();
+      return;
+    }
+  
     if (cat.count < max) {
       cat.count++;
       cat.doubled = doubled;
       cat.playedBy = doubled ? playedBy : null;
     }
-
+  
     newScores[roundId][gameId] = player;
     setScores(newScores);
     closeModal();
   };
+  
+  const cardsLeft = () => {
+    const playerData = scores[roundId][gameId];
+    const left = {};
+  
+    categories.forEach(({ label }) => {
+      const totalUsed = playerData.reduce((sum, p) => sum + p[label].count, 0);
+      left[label] = maxValues[label] - totalUsed;
+    });
+  
+    return left;
+  };
 
   const updateCount = (playerIdx, catLabel, delta) => {
-    if (delta === 1 && ["Queens", "King"].includes(catLabel)) {
-      openModal(playerIdx, catLabel);
-      return;
-    }
-
     const newScores = { ...scores };
     const player = [...newScores[roundId][gameId]];
     const cat = player[playerIdx][catLabel];
     const max = maxValues[catLabel];
-
+  
+    // Calculate total across all players
+    const totalForCategory = player.reduce((acc, p) => acc + p[catLabel].count, 0);
+  
+    if (delta === 1) {
+      if (["Queens", "King"].includes(catLabel)) {
+        openModal(playerIdx, catLabel);
+        return;
+      }
+      if (totalForCategory >= max) return; // Block if total exceeds max
+    }
+  
     cat.count = Math.max(0, Math.min(cat.count + delta, max));
     if (cat.count === 0) {
       cat.doubled = false;
       cat.playedBy = null;
     }
-
+  
     newScores[roundId][gameId] = player;
     setScores(newScores);
   };
+  
 
   // Calculate score for playerIdx in a specific round and game
   const calculateScore = (rId, gId, playerIdx) => {
@@ -234,7 +261,26 @@ function GameTracker() {
           </div>
         </div>
       )}
-
+ <div style={{
+  position: "fixed",
+  top: 10,
+  right: 10,
+  backgroundColor: "#222",
+  color: "#eee",
+  padding: "8px 12px",
+  borderRadius: "8px",
+  fontSize: "0.9rem",
+  zIndex: 1000,
+  boxShadow: "0 0 8px rgba(0,0,0,0.5)"
+}}>
+  {Object.entries(cardsLeft()).map(([cat, count]) => (
+    <div key={cat} style={{ marginBottom: 4 }}>
+      <span style={{ color: count === 0 ? 'red' : 'inherit', fontWeight: count === 0 ? 'bold' : 'normal' }}>
+        {cat}
+      </span>: {count}
+    </div>
+  ))}
+</div>
       <div
         style={{
           marginTop: "20px",
