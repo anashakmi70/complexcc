@@ -22,16 +22,16 @@ const defaultScores = () => {
   for (let r = 1; r <= 4; r++) {
     rounds[r] = {
       1: Array(4).fill().map(() => ({
-        L6oosh: { count: 0 },
-        Diamonds: { count: 0 },
-        Queens: { count: 0, doubled: false, playedBy: null },
-        King: { count: 0, doubled: false, playedBy: null },
+        L6oosh: [],
+        Diamonds: [],
+        Queens: [],
+        King: [],
       })),
       2: Array(4).fill().map(() => ({
-        L6oosh: { count: 0 },
-        Diamonds: { count: 0 },
-        Queens: { count: 0, doubled: false, playedBy: null },
-        King: { count: 0, doubled: false, playedBy: null },
+        L6oosh: [],
+        Diamonds: [],
+        Queens: [],
+        King: [],
       })),
     };
   }

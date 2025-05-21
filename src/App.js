@@ -1,48 +1,63 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
-import RoundSelect from "./RoundSelect";
+import React, { useState } from "react";
 import GameTracker from "./GameTracker";
-import "./App.css";
 import { useScoreStore } from "./useScoreStore";
+import ScoreSheetModal from "./ScoreSheetModal";
+import "./App.css";
 
-function Home() {
-  const navigate = useNavigate();
-  const resetScores = useScoreStore((state) => state.resetScores);
+function App() {
+  const [roundId, setRoundId] = useState(null);
+  const [gameId, setGameId] = useState(null);
+  const [showScoreSheet, setShowScoreSheet] = useState(false);
+  const { resetScores } = useScoreStore();
 
-  const handleResetScores = () => {
-    resetScores();
-    navigate("/");
-    window.location.reload();
+  const handleGameSelect = (round, game) => {
+    setRoundId(round);
+    setGameId(game);
+  };
+
+  const goHome = () => {
+    setRoundId(null);
+    setGameId(null);
   };
 
   return (
-    <div className="home">
-      <h1>Game Tracker</h1>
-      <p>Select a Round:</p>
-      <div className="button-grid">
-        {[1, 2, 3, 4].map((round) => (
-          <Link key={round} to={`/round/${round}`}>
-            <button>Round {round}</button>
-          </Link>
-        ))}
-      </div>
-
-      <button className="back-btn" onClick={handleResetScores} style={{ marginTop: "40px" }}>
-        🔄 Reset All Scores
-      </button>
+    <div className="app">
+      {!roundId || !gameId ? (
+        <div className="home">
+          <h1>Game Tracker</h1>
+          {[1, 2, 3, 4].map((round) => (
+            <div key={round}>
+              <h2>Round {round}</h2>
+              <button onClick={() => handleGameSelect(round, 1)}>Game 1</button>
+              <button onClick={() => handleGameSelect(round, 2)}>Game 2</button>
+            </div>
+          ))}
+          <button onClick={resetScores}>Reset All Scores</button>
+        </div>
+      ) : (
+        <div>
+          <GameTracker
+            roundId={String(roundId)}
+            gameId={String(gameId)}
+            goHome={goHome}
+            goToNextGame={() => {
+              if (gameId === 1) {
+                setGameId(2);
+              } else if (gameId === 2 && roundId < 4) {
+                setRoundId(roundId + 1);
+                setGameId(1);
+              } else {
+                alert("🎉 You've completed all rounds!");
+              }
+            }}
+            showScoreSheet={() => setShowScoreSheet(true)}
+          />
+        </div>
+      )}
+      {showScoreSheet && (
+        <ScoreSheetModal onClose={() => setShowScoreSheet(false)} />
+      )}
     </div>
-  );
-}
-
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/round/:roundId" element={<RoundSelect />} />
-        <Route path="/round/:roundId/game/:gameId" element={<GameTracker />} />
-      </Routes>
-    </Router>
   );
 }
 
