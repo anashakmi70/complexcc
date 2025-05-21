@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useState } from "react";
 import GameTracker from "./GameTracker";
 import { useScoreStore } from "./useScoreStore";
@@ -6,7 +7,6 @@ import "./App.css";
 function App() {
   const [roundId, setRoundId] = useState(null);
   const [gameId, setGameId] = useState(null);
-  const [showScoreSheet, setShowScoreSheet] = useState(false);
   const { resetScores } = useScoreStore();
 
   const handleGameSelect = (round, game) => {
@@ -49,12 +49,8 @@ function App() {
                 alert("🎉 You've completed all rounds!");
               }
             }}
-            showScoreSheet={() => setShowScoreSheet(true)}
           />
         </div>
-      )}
-      {showScoreSheet && (
-        <ScoreSheetModal onClose={() => setShowScoreSheet(false)} />
       )}
     </div>
   );
