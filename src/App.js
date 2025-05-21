@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import GameTracker from "./GameTracker";
 import { useScoreStore } from "./useScoreStore";
-import ScoreSheetModal from "./ScoreSheetModal";
 import "./App.css";
 
 function App() {
