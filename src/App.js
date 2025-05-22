@@ -1,48 +1,51 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
-import RoundSelect from "./RoundSelect";
-import GameTracker from "./GameTracker";
-import "./App.css";
-import { useScoreStore } from "./useScoreStore";
+import React, { useState } from 'react';
+import HomePage from './components/HomePage';
+import GamePage from './components/GamePage';
+import './App.css';
 
-function Home() {
-  const navigate = useNavigate();
-  const resetScores = useScoreStore((state) => state.resetScores);
+function App() {
+  const [mode, setMode] = useState(null);
+  const [playerNames, setPlayerNames] = useState([]);
+  const [scores, setScores] = useState({});
+  const [rounds, setRounds] = useState({});
+  const [cardCounts, setCardCounts] = useState({
+    l6oosh: 0,
+    diamonds: 0,
+    queens: [],
+    kings: [],
+  });
 
-  const handleResetScores = () => {
-    resetScores();
-    navigate("/");
-    window.location.reload();
+  const handleReset = () => {
+    setScores({});
+    setRounds({});
+    setCardCounts({ l6oosh: 0, diamonds: 0, queens: [], kings: [] });
+    setMode(null);
+    setPlayerNames([]);
   };
 
   return (
-    <div className="home">
-      <h1>Game Tracker</h1>
-      <p>Select a Round:</p>
-      <div className="button-grid">
-        {[1, 2, 3, 4].map((round) => (
-          <Link key={round} to={`/round/${round}`}>
-            <button>Round {round}</button>
-          </Link>
-        ))}
-      </div>
-
-      <button className="back-btn" onClick={handleResetScores} style={{ marginTop: "40px" }}>
-        🔄 Reset All Scores
-      </button>
+    <div className="app">
+      {!mode ? (
+        <HomePage
+          setMode={setMode}
+          setPlayerNames={setPlayerNames}
+          playerNames={playerNames}
+          handleReset={handleReset}
+        />
+      ) : (
+        <GamePage
+          mode={mode}
+          playerNames={playerNames}
+          scores={scores}
+          setScores={setScores}
+          rounds={rounds}
+          setRounds={setRounds}
+          cardCounts={cardCounts}
+          setCardCounts={setCardCounts}
+          goHome={() => setMode(null)}
+        />
+      )}
     </div>
-  );
-}
-
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/round/:roundId" element={<RoundSelect />} />
-        <Route path="/round/:roundId/game/:gameId" element={<GameTracker />} />
-      </Routes>
-    </Router>
   );
 }
 
