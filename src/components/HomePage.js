@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import './HomePage.css';
 
 function HomePage({ setMode, setPlayerNames, handleReset, playerNames }) {
-  const [names, setNames] = useState(playerNames.length ? playerNames : ['', '', '', '']);
+    const [names, setNames] = useState(Array.isArray(playerNames) && playerNames.length ? playerNames : ['', '', '', '']);
 
   const startGame = (mode) => {
     const filled = names.map((n, i) => n || `P${i + 1}`);
