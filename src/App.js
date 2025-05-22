@@ -1,35 +1,25 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
-import RoundSelect from "./RoundSelect";
-import GameTracker from "./GameTracker";
-import "./App.css";
-import { useScoreStore } from "./useScoreStore";
+import React, { useState } from 'react';
+import HomePage from './components/HomePage';
+import GamePage from './components/GamePage';
+import './App.css';
 
-function Home() {
-  const navigate = useNavigate();
-  const resetScores = useScoreStore((state) => state.resetScores);
+function App() {
+  const [mode, setMode] = useState(null);
+  const [resetFlag, setResetFlag] = useState(false);
 
-  const handleResetScores = () => {
-    resetScores();
-    navigate("/");
-    window.location.reload();
+  const handleReset = () => {
+    setResetFlag(true);
+    setTimeout(() => setResetFlag(false), 0);
+    setMode(null);
   };
 
   return (
-    <div className="home">
-      <h1>Game Tracker</h1>
-      <p>Select a Round:</p>
-      <div className="button-grid">
-        {[1, 2, 3, 4].map((round) => (
-          <Link key={round} to={`/round/${round}`}>
-            <button>Round {round}</button>
-          </Link>
-        ))}
-      </div>
-
-      <button className="back-btn" onClick={handleResetScores} style={{ marginTop: "40px" }}>
-        🔄 Reset All Scores
-      </button>
+    <div className="app">
+      {!mode ? (
+        <HomePage setMode={setMode} handleReset={handleReset} />
+      ) : (
+        <GamePage mode={mode} resetFlag={resetFlag} />
+      )}
     </div>
   );
 }
